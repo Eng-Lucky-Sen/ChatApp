@@ -20,8 +20,9 @@
 // export default HomePage
     
 
-import React, { useState } from 'react'
+import React, { useState,useContext } from 'react'
 import ChatContainer from '../components/ChatContainer'
+import { ChatContext } from '../../context/ChatContext'
 import RightSidebar from '../components/RightSidebar'
 import Sidebar from '../components/Sidebar'
 

@@ -1,52 +1,179 @@
-import React ,{useContext,useState,useEffect}from 'react'
-import assets, { imagesDummyData } from '../assets/assets'
+import React, { useState, useContext, useEffect } from 'react'
+import assets from '../assets/assets'
 import { ChatContext } from '../../context/ChatContext'
 import { AuthContext } from '../../context/AuthContext'
 
 const RightSidebar = () => {
-  const {selectedUser, messages} = useContext(ChatContext)
-  const {logout, onlineUsers} = useContext(AuthContext)
+  const { selectedUser, messages } = useContext(ChatContext)
+  const { logout, onlineUsers } = useContext(AuthContext)
+
   const [msgImages, setMsgImages] = useState([])
+  const [activeTab, setActiveTab] = useState('media')
 
-  // Get all the images from the messages and set them to state
-useEffect(()=>{
-  setMsgImages(
-    messages.filter(msg => msg.image).map(msg=>msg.image)
-  )
-},[messages])
+  const isOnline = onlineUsers.includes(selectedUser?._id?.toString())
+  const msgCount = messages?.length || 0
+  const imgCount = messages?.filter(m => m.image).length || 0
 
-  return selectedUser && (
-    <div className={`bg-[#8185B2]/10 text-white w-full relative overflow-y-scroll ${selectedUser ? "max-md:hidden" : ""}`}>
-      <div className='pt-16 flex flex-col items-center gap-2 text-xs font-light mx-auto'>
-        <img 
-          src={selectedUser?.profilePic || assets.avatar_icon} 
-          alt="" 
-          className='w-20 aspect-[1/1] rounded-full' 
-        />
-        <h1 className='px-10 text-xl font-medium mx-auto flex items-center gap-2'>
-          {onlineUsers.includes(selectedUser._id) && <p className='w-2 h-2 rounded-full bg-green-500'></p>}
-          {selectedUser.fullName}
-        </h1>
-        <p className='px-10 mx-auto'>{selectedUser.bio}</p>
-      </div>
-      <hr className="border-[#ffffff50] my-4"/>
-      <div className="px-5 text-xs">
-        <p>Media</p>
-        <div className='mt-2 max-h-[200px] overflow-y-scroll grid grid-cols-2 gap-4 opacity-80'>
-          {msgImages.map((url,index)=>(
-            <div key={index} onClick={()=>window.open(url)}
-            className='cursor-pointer rounded'>
-              <img src={url} alt="" className='h-full rounded-md' />
-            </div>
+  useEffect(() => {
+    setMsgImages(messages.filter(msg => msg.image).map(msg => msg.image))
+  }, [messages])
+
+  if (!selectedUser) return null
+
+  return (
+    <div
+      className={`sidebar-right ${selectedUser ? 'max-md:hidden' : ''}`}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: 'rgba(10,8,25,0.6)',
+        backdropFilter: 'blur(20px)',
+        borderLeft: '1px solid rgba(255,255,255,0.06)',
+        color: '#fff',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+
+      {/* Top Info */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '28px 16px 80px' }}>
+
+        {/* Avatar */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <div style={{ position: 'relative' }}>
+            <img
+              src={selectedUser?.profilePic || assets.avatar_icon}
+              alt=""
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: '50%',
+                border: '2px solid rgba(124,58,237,0.4)',
+                objectFit: 'cover',
+              }}
+            />
+
+            {isOnline && (
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: 4,
+                  right: 4,
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  background: '#22c55e',
+                  border: '2px solid #0a0819',
+                }}
+              />
+            )}
+          </div>
+
+          <h2 style={{ fontSize: 16, fontWeight: 600 }}>
+            {selectedUser.fullName}
+          </h2>
+
+          <p style={{ fontSize: 12, color: isOnline ? '#4ade80' : '#888' }}>
+            {isOnline ? 'Online' : 'Offline'}
+          </p>
+
+          {selectedUser.bio && (
+            <p style={{ fontSize: 12, color: '#aaa', textAlign: 'center' }}>
+              {selectedUser.bio}
+            </p>
+          )}
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 20 }}>
+          <div>
+            <p style={{ fontSize: 16 }}>{msgCount}</p>
+            <p style={{ fontSize: 10, color: '#888' }}>Messages</p>
+          </div>
+          <div>
+            <p style={{ fontSize: 16 }}>{imgCount}</p>
+            <p style={{ fontSize: 10, color: '#888' }}>Media</p>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 5, marginBottom: 10 }}>
+          {['media', 'files'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                flex: 1,
+                padding: '6px',
+                borderRadius: 8,
+                border: 'none',
+                cursor: 'pointer',
+                background: activeTab === tab ? '#7c3aed' : '#222',
+                color: '#fff',
+                fontSize: 11,
+              }}
+            >
+              {tab}
+            </button>
           ))}
         </div>
+
+        {/* Media */}
+        {activeTab === 'media' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 6 }}>
+            {msgImages.length === 0 ? (
+              <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#555' }}>
+                No media
+              </p>
+            ) : (
+              msgImages.map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt=""
+                  onClick={() => window.open(url)}
+                  style={{
+                    width: '100%',
+                    height: 70,
+                    objectFit: 'cover',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                  }}
+                />
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Files */}
+        {activeTab === 'files' && (
+          <p style={{ textAlign: 'center', color: '#555' }}>
+            No files yet
+          </p>
+        )}
       </div>
-      <button onClick={()=> logout()} className='absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from purple-400 to-violet-600 text-white border-none text-sm font-light py-2 px-20 rounded-full cursor-pointer'>
+
+      {/* Logout */}
+      <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+        <button
+          onClick={logout}
+          style={{
+            width: '100%',
+            padding: '10px',
+            borderRadius: 10,
+            border: '#fff',
+            background: '#00000000',
+            color: '#fff',
+            cursor: 'pointer',
+          }}
+        >
           Logout
-      </button>
+        </button>
+      </div>
     </div>
   )
 }
 
 export default RightSidebar
-

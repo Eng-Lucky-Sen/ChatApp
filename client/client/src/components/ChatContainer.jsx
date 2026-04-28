@@ -5,7 +5,7 @@ import { ChatContext } from '../../context/ChatContext'
 import { AuthContext } from '../../context/AuthContext'
 import { formatMessageTime } from '../lib/utils'
 import toast from 'react-hot-toast'
-import nlp from 'compromise'
+import nlp from "compromise/one";
 
 // ─────────────────────────────────────────────────────────────
 // GLOBAL STYLES
